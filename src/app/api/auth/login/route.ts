@@ -28,10 +28,7 @@ export async function POST(req: Request) {
     const message = error instanceof Error ? error.message : String(error);
     console.error("Login error:", message);
     
-    // Return detailed error in development, generic in production
-    if (process.env.NODE_ENV === "development") {
-      return NextResponse.json({ error: `Login failed: ${message}` }, { status: 500 });
-    }
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    // TEMPORARY: Return detailed error in production for debugging
+    return NextResponse.json({ error: `Login failed: ${message}` }, { status: 500 });
   }
 }
