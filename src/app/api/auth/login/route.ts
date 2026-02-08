@@ -9,6 +9,10 @@ export async function POST(req: Request) {
   try {
     const { email, password } = await req.json();
 
+    if (!email || !password) {
+      return NextResponse.json({ error: "Missing email or password" }, { status: 400 });
+    }
+
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
 
@@ -21,7 +25,13 @@ export async function POST(req: Request) {
     res.cookies.set("token", token, { httpOnly: true, sameSite: "lax", path: "/", maxAge: 60 * 60 * 24 * 7 });
     return res;
   } catch (error) {
-    console.error("Login error:", error);
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("Login error:", message);
+    
+    // Return detailed error in development, generic in production
+    if (process.env.NODE_ENV === "development") {
+      return NextResponse.json({ error: `Login failed: ${message}` }, { status: 500 });
+    }
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

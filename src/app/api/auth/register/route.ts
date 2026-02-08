@@ -66,7 +66,13 @@ export async function POST(req: Request) {
 
     return res;
   } catch (error) {
-    console.error("Register error:", error);
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("Register error:", message);
+    
+    // Return detailed error in development, generic in production
+    if (process.env.NODE_ENV === "development") {
+      return NextResponse.json({ error: `Register failed: ${message}` }, { status: 500 });
+    }
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
